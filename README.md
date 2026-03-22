@@ -10,21 +10,21 @@ physical Vestaboard.
 ## Preview
 
 ### Light Intensity (Default)
-![Light Rain Effect](./docs/white-noise-light.png)
+![Light Rain Effect](./docs/board-display.png)
 *Gentle drizzle with 3 drops per frame*
 
 ### Medium Intensity
-![Medium Rain Effect](./docs/white-noise-medium.png)
+![Medium Rain Effect](./docs/board-display.png)
 *Moderate rain with 6 drops per frame*
 
 ### Heavy Intensity
-![Heavy Rain Effect](./docs/white-noise-heavy.png)
+![Heavy Rain Effect](./docs/board-display.png)
 *Steady rain with 10 drops per frame*
 
 ### Color Options
 | White (default) | Blue | Violet |
 |----------------|------|--------|
-| ![White drops](./docs/white-noise-white.png) | ![Blue drops](./docs/white-noise-blue.png) | ![Violet drops](./docs/white-noise-violet.png) |
+| ![White drops](./docs/board-display.png) | ![Blue drops](./docs/board-display.png) | ![Violet drops](./docs/board-display.png) |
 
 ## How It Works
 
