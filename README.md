@@ -1,6 +1,6 @@
 # White Noise Plugin
 
-![White Noise Display](./docs/white-noise-display.png)
+![White Noise Display](./docs/board-display.png)
 
 A gentle rain / white noise mode for FiestaBoard. It shows softly cascading
 white (or blue/violet) tiles that drift down the board with only a few

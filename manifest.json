@@ -11,33 +11,145 @@
   "settings_schema": {
     "type": "object",
     "properties": {
-      "enabled": {"type": "boolean", "title": "Enable White Noise", "default": false},
-      "intensity": {"type": "string", "title": "Rain Intensity", "description": "How many drops appear per frame. 'light' is a gentle drizzle, 'heavy' is a steady rain. Use 'custom' for manual control.", "enum": ["light", "medium", "heavy", "custom"], "default": "light"},
-      "drop_color": {"type": "string", "title": "Drop Color", "description": "Tile color for the raindrops.", "enum": ["white", "blue", "violet"], "default": "white"},
-      "drops_per_frame": {"type": "integer", "title": "Drops Per Frame", "description": "Number of new drops to spawn each frame (only used when intensity is 'custom'). Range: 1-22.", "minimum": 1, "maximum": 22, "default": 3},
-      "max_drops": {"type": "integer", "title": "Max Simultaneous Drops", "description": "Maximum number of raindrops allowed on the board at once. Higher = denser rain. Range: 1-132.", "minimum": 1, "maximum": 132, "default": 30}
+      "enabled": {
+        "type": "boolean",
+        "title": "Enable White Noise",
+        "default": false
+      },
+      "intensity": {
+        "type": "string",
+        "title": "Rain Intensity",
+        "description": "How many drops appear per frame. 'light' is a gentle drizzle, 'heavy' is a steady rain. Use 'custom' for manual control.",
+        "enum": [
+          "light",
+          "medium",
+          "heavy",
+          "custom"
+        ],
+        "default": "light"
+      },
+      "drop_color": {
+        "type": "string",
+        "title": "Drop Color",
+        "description": "Tile color for the raindrops.",
+        "enum": [
+          "white",
+          "blue",
+          "violet"
+        ],
+        "default": "white"
+      },
+      "drops_per_frame": {
+        "type": "integer",
+        "title": "Drops Per Frame",
+        "description": "Number of new drops to spawn each frame (only used when intensity is 'custom'). Range: 1-22.",
+        "minimum": 1,
+        "maximum": 22,
+        "default": 3
+      },
+      "max_drops": {
+        "type": "integer",
+        "title": "Max Simultaneous Drops",
+        "description": "Maximum number of raindrops allowed on the board at once. Higher = denser rain. Range: 1-132.",
+        "minimum": 1,
+        "maximum": 132,
+        "default": 30
+      }
     }
   },
   "env_vars": [
-    {"name": "WHITE_NOISE_ENABLED", "required": false, "description": "Enable the white noise rain effect", "default": "false"},
-    {"name": "WHITE_NOISE_INTENSITY", "required": false, "description": "Rain intensity: light, medium, heavy, or custom", "default": "light"},
-    {"name": "WHITE_NOISE_DROP_COLOR", "required": false, "description": "Raindrop tile color: white, blue, or violet", "default": "white"},
-    {"name": "WHITE_NOISE_DROPS_PER_FRAME", "required": false, "description": "Number of drops per frame when using custom intensity (1-22)", "default": "3"},
-    {"name": "WHITE_NOISE_MAX_DROPS", "required": false, "description": "Maximum simultaneous drops on board (1-132)", "default": "30"}
+    {
+      "name": "WHITE_NOISE_ENABLED",
+      "required": false,
+      "description": "Enable the white noise rain effect",
+      "default": "false"
+    },
+    {
+      "name": "WHITE_NOISE_INTENSITY",
+      "required": false,
+      "description": "Rain intensity: light, medium, heavy, or custom",
+      "default": "light"
+    },
+    {
+      "name": "WHITE_NOISE_DROP_COLOR",
+      "required": false,
+      "description": "Raindrop tile color: white, blue, or violet",
+      "default": "white"
+    },
+    {
+      "name": "WHITE_NOISE_DROPS_PER_FRAME",
+      "required": false,
+      "description": "Number of drops per frame when using custom intensity (1-22)",
+      "default": "3"
+    },
+    {
+      "name": "WHITE_NOISE_MAX_DROPS",
+      "required": false,
+      "description": "Maximum simultaneous drops on board (1-132)",
+      "default": "30"
+    }
   ],
   "variables": {
     "groups": {
-      "display": {"label": "Display"},
-      "config": {"label": "Configuration"}
+      "display": {
+        "label": "Display"
+      },
+      "config": {
+        "label": "Configuration"
+      }
     },
     "simple": {
-      "white_noise": {"description": "Full white noise rain pattern for board display", "type": "string", "max_length": 200, "group": "display", "example": "(rain pattern)"},
-      "intensity": {"description": "Current rain intensity level", "type": "string", "max_length": 6, "group": "config", "example": "light"},
-      "drop_color": {"description": "Current raindrop color", "type": "string", "max_length": 6, "group": "config", "example": "white"},
-      "active_drops": {"description": "Number of active raindrops on screen", "type": "number", "max_length": 3, "group": "display", "example": "12"},
-      "drops_per_frame": {"description": "Drops spawned per frame", "type": "number", "max_length": 2, "group": "config", "example": "3"},
-      "max_drops": {"description": "Maximum simultaneous drops allowed", "type": "number", "max_length": 3, "group": "config", "example": "30"}
+      "white_noise": {
+        "description": "Full white noise rain pattern for board display",
+        "type": "string",
+        "max_length": 200,
+        "group": "display",
+        "example": "(rain pattern)"
+      },
+      "intensity": {
+        "description": "Current rain intensity level",
+        "type": "string",
+        "max_length": 6,
+        "group": "config",
+        "example": "light"
+      },
+      "drop_color": {
+        "description": "Current raindrop color",
+        "type": "string",
+        "max_length": 6,
+        "group": "config",
+        "example": "white"
+      },
+      "active_drops": {
+        "description": "Number of active raindrops on screen",
+        "type": "number",
+        "max_length": 3,
+        "group": "display",
+        "example": "12"
+      },
+      "drops_per_frame": {
+        "description": "Drops spawned per frame",
+        "type": "number",
+        "max_length": 2,
+        "group": "config",
+        "example": "3"
+      },
+      "max_drops": {
+        "description": "Maximum simultaneous drops allowed",
+        "type": "number",
+        "max_length": 3,
+        "group": "config",
+        "example": "30"
+      }
     }
   },
-  "fiestaboard_version": ">=2.10.0"
+  "fiestaboard_version": ">=2.10.0",
+  "screenshots": [
+    {
+      "src": "docs/board-display.png",
+      "alt": "White Noise displayed on a Vestaboard",
+      "caption": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
+      "primary": true
+    }
+  ]
 }
