@@ -319,7 +319,7 @@ class TestWhiteNoisePlugin:
         with open(manifest_path) as f:
             manifest = json.load(f)
 
-        declared_vars = manifest["variables"]["simple"]
+        declared_vars = list(manifest["variables"]["simple"].keys())
 
         plugin = WhiteNoisePlugin(sample_manifest)
         plugin.config = sample_config
@@ -408,3 +408,67 @@ class TestWhiteNoiseEdgeCases:
         for _ in range(20):
             plugin.fetch_data()
         assert len(plugin._drops) <= 20
+
+
+class TestWhiteNoiseManifestMetadata:
+    """Tests for the rich metadata format in the white_noise manifest."""
+
+    def test_manifest_uses_dict_simple_format(self):
+        """Manifest uses the dict format for simple variables with metadata."""
+        manifest_path = Path(__file__).parent.parent / "manifest.json"
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+
+        simple = manifest["variables"]["simple"]
+        assert isinstance(simple, dict), "simple should use the rich dict format"
+
+    def test_all_variables_have_descriptions(self):
+        """Every variable in the manifest has a description."""
+        manifest_path = Path(__file__).parent.parent / "manifest.json"
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+
+        simple = manifest["variables"]["simple"]
+        for var_name, meta in simple.items():
+            assert "description" in meta and meta["description"], \
+                f"Variable '{var_name}' missing description"
+
+    def test_all_variables_have_valid_groups(self):
+        """Every variable references a group that is defined."""
+        manifest_path = Path(__file__).parent.parent / "manifest.json"
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+
+        groups = set(manifest["variables"].get("groups", {}).keys())
+        simple = manifest["variables"]["simple"]
+        for var_name, meta in simple.items():
+            group = meta.get("group", "")
+            if group:
+                assert group in groups, \
+                    f"Variable '{var_name}' references undefined group '{group}'"
+
+    def test_groups_are_defined(self):
+        """Manifest defines variable groups."""
+        manifest_path = Path(__file__).parent.parent / "manifest.json"
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+
+        groups = manifest["variables"].get("groups", {})
+        assert len(groups) > 0, "Manifest should define at least one group"
+        for group_id, group_def in groups.items():
+            assert "label" in group_def, f"Group '{group_id}' missing label"
+
+    def test_all_6_variables_present(self):
+        """All 6 white_noise variables are declared in the manifest."""
+        manifest_path = Path(__file__).parent.parent / "manifest.json"
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+
+        simple = manifest["variables"]["simple"]
+        expected = [
+            "white_noise", "intensity", "drop_color",
+            "active_drops", "drops_per_frame", "max_drops",
+        ]
+        for var in expected:
+            assert var in simple, f"Missing variable: {var}"
+        assert len(simple) == len(expected)

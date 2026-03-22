@@ -33,6 +33,15 @@ def sample_manifest():
         "author": "FiestaBoard Team",
         "settings_schema": {},
         "variables": {
-            "simple": ["white_noise", "intensity", "drop_color", "active_drops"]
+            "groups": {
+                "display": {"label": "Display"},
+                "config": {"label": "Configuration"},
+            },
+            "simple": {
+                "white_noise": {"description": "Full white noise rain pattern", "type": "string", "max_length": 200, "group": "display"},
+                "intensity": {"description": "Current rain intensity level", "type": "string", "max_length": 6, "group": "config"},
+                "drop_color": {"description": "Current raindrop color", "type": "string", "max_length": 6, "group": "config"},
+                "active_drops": {"description": "Number of active raindrops", "type": "number", "max_length": 3, "group": "display"},
+            },
         },
     }
