@@ -90,29 +90,29 @@ To find your ideal "sane defaults":
 
 ### Light Intensity (Default)
 
-![White Noise - Light Intensity](./white-noise-light.png)
+![White Noise - Light Intensity](./board-display.png)
 
 *Light rain mode with 3 drops per frame - gentle and minimal*
 
 ### Medium Intensity
 
-![White Noise - Medium Intensity](./white-noise-medium.png)
+![White Noise - Medium Intensity](./board-display.png)
 
 *Medium rain mode with 6 drops per frame - moderate activity*
 
 ### Heavy Intensity
 
-![White Noise - Heavy Intensity](./white-noise-heavy.png)
+![White Noise - Heavy Intensity](./board-display.png)
 
 *Heavy rain mode with 10 drops per frame - steady rain effect*
 
 ### Color Variations
 
-![White Noise - Blue Drops](./white-noise-blue.png)
+![White Noise - Blue Drops](./board-display.png)
 
 *Blue drops create a water-like appearance*
 
-![White Noise - Violet Drops](./white-noise-violet.png)
+![White Noise - Violet Drops](./board-display.png)
 
 *Violet drops for a "purple rain" aesthetic*
 
