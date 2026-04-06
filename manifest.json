@@ -1,8 +1,8 @@
 {
   "id": "white_noise",
   "name": "White Noise",
-  "version": "1.0.0",
-  "description": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
+  "version": "1.1.0",
+  "description": "Gentle rain / white noise mode — softly cascading tiles that create a soothing ambient pitter-patter",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--white-noise",
   "documentation": "README.md",
@@ -148,8 +148,46 @@
     {
       "src": "docs/board-display.png",
       "alt": "White Noise displayed on a Vestaboard",
-      "caption": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
+      "caption": "Gentle rain / white noise mode — softly cascading tiles that create a soothing ambient pitter-patter",
       "primary": true
     }
-  ]
+  ],
+  "demo": {
+    "name": "White Noise Demo",
+    "device_type": "flagship",
+    "template": [
+      "{{white_noise.white_noise}}",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "line_metadata": [
+      {
+        "alignment": "left",
+        "wrap": true
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      }
+    ]
+  }
 }
