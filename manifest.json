@@ -1,7 +1,7 @@
 {
   "id": "white_noise",
   "name": "White Noise",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--white-noise",
