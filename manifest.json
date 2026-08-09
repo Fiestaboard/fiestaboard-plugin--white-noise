@@ -3,7 +3,7 @@
   "name": "White Noise",
   "version": "1.1.3",
   "live_data": true,
-  "description": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
+  "description": "Gentle rain / white noise mode — softly cascading tiles that create a soothing ambient pitter-patter",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--white-noise",
   "documentation": "README.md",
@@ -149,8 +149,30 @@
     {
       "src": "docs/board-display.png",
       "alt": "White Noise displayed on a Vestaboard",
-      "caption": "Gentle rain / white noise mode \u2014 softly cascading tiles that create a soothing ambient pitter-patter",
+      "caption": "Gentle rain / white noise mode — softly cascading tiles that create a soothing ambient pitter-patter",
       "primary": true
+    }
+  ],
+  "teaser": "RAIN 45 MIN",
+  "previews": [
+    {
+      "device_type": "flagship",
+      "rows": [
+        "{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}",
+        "     WHITE NOISE",
+        "",
+        "   RAIN ON TIN ROOF",
+        "   VOL 60%   45 MIN",
+        "{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}"
+      ]
+    },
+    {
+      "device_type": "note",
+      "rows": [
+        "{67}{67} WHITE NOISE",
+        "RAIN ON TIN",
+        "VOL 60% 45 MIN"
+      ]
     }
   ],
   "demo": {
