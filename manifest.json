@@ -1,7 +1,7 @@
 {
   "id": "white_noise",
   "name": "White Noise",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "live_data": true,
   "description": "Gentle rain / white noise mode — softly cascading tiles that create a soothing ambient pitter-patter",
   "author": "FiestaBoard Team",
@@ -43,17 +43,17 @@
       "drops_per_frame": {
         "type": "integer",
         "title": "Drops Per Frame",
-        "description": "Number of new drops to spawn each frame (only used when intensity is 'custom'). Range: 1-22.",
+        "description": "Number of new drops to spawn each frame (only used when intensity is 'custom'). Range: 1-120 (bounded by the widest board FiestaBoard supports; a given board only spawns up to its own width).",
         "minimum": 1,
-        "maximum": 22,
+        "maximum": 120,
         "default": 3
       },
       "max_drops": {
         "type": "integer",
         "title": "Max Simultaneous Drops",
-        "description": "Maximum number of raindrops allowed on the board at once. Higher = denser rain. Range: 1-132.",
+        "description": "Maximum number of raindrops allowed on the board at once. Higher = denser rain. Range: 1-2880 (bounded by the largest board FiestaBoard supports; a given board only ever holds up to its own tile count).",
         "minimum": 1,
-        "maximum": 132,
+        "maximum": 2880,
         "default": 30
       }
     }
@@ -103,7 +103,7 @@
       "white_noise": {
         "description": "Full white noise rain pattern for board display",
         "type": "string",
-        "max_length": 200,
+        "max_length": 2903,
         "group": "display",
         "example": "(rain pattern)"
       },
@@ -124,21 +124,21 @@
       "active_drops": {
         "description": "Number of active raindrops on screen",
         "type": "number",
-        "max_length": 3,
+        "max_length": 4,
         "group": "display",
         "example": "12"
       },
       "drops_per_frame": {
         "description": "Drops spawned per frame",
         "type": "number",
-        "max_length": 2,
+        "max_length": 3,
         "group": "config",
         "example": "3"
       },
       "max_drops": {
         "description": "Maximum simultaneous drops allowed",
         "type": "number",
-        "max_length": 3,
+        "max_length": 4,
         "group": "config",
         "example": "30"
       }
@@ -172,6 +172,20 @@
         "{67}{67} WHITE NOISE",
         "RAIN ON TIN",
         "VOL 60% 45 MIN"
+      ]
+    },
+    {
+      "label": "Note Array (2x2 grid)",
+      "device_type": "note_array",
+      "notes_wide": 2,
+      "notes_tall": 2,
+      "rows": [
+        "{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}",
+        "     WHITE NOISE",
+        "",
+        "   RAIN ON TIN ROOF",
+        "   VOL 60%   45 MIN",
+        "{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}{67}"
       ]
     }
   ],

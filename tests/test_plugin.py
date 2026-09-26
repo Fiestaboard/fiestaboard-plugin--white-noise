@@ -81,12 +81,27 @@ class TestWhiteNoisePlugin:
         assert len(errors) == 1
         assert "drops_per_frame" in errors[0].lower()
 
-    def test_validate_config_drops_per_frame_too_high(self, sample_manifest):
-        """drops_per_frame exceeding board width should error."""
+    def test_validate_config_drops_per_frame_within_array_width(self, sample_manifest):
+        """drops_per_frame above a Flagship's 22 cols must be accepted.
+
+        Regression test: config is shared across every board the user
+        owns, not just a Flagship, so a value that only fits a wide
+        note-array must not be rejected. 25 is wider than a Flagship (22)
+        but well within an 8-wide array (120).
+        """
         plugin = WhiteNoisePlugin(sample_manifest)
         errors = plugin.validate_config({
             "intensity": "custom",
             "drops_per_frame": 25
+        })
+        assert errors == []
+
+    def test_validate_config_drops_per_frame_too_high(self, sample_manifest):
+        """drops_per_frame exceeding the widest supported board should error."""
+        plugin = WhiteNoisePlugin(sample_manifest)
+        errors = plugin.validate_config({
+            "intensity": "custom",
+            "drops_per_frame": 121
         })
         assert len(errors) == 1
         assert "drops_per_frame" in errors[0].lower()
@@ -98,10 +113,20 @@ class TestWhiteNoisePlugin:
         assert len(errors) == 1
         assert "max_drops" in errors[0].lower()
 
-    def test_validate_config_max_drops_too_high(self, sample_manifest):
-        """max_drops exceeding board capacity should error."""
+    def test_validate_config_max_drops_within_array_capacity(self, sample_manifest):
+        """max_drops above a Flagship's 132 tiles must be accepted.
+
+        Regression test: 200 exceeds a Flagship's tile count (132) but is
+        nowhere near the largest board's (2880), so it must be valid.
+        """
         plugin = WhiteNoisePlugin(sample_manifest)
         errors = plugin.validate_config({"max_drops": 200})
+        assert errors == []
+
+    def test_validate_config_max_drops_too_high(self, sample_manifest):
+        """max_drops exceeding the largest supported board's tiles should error."""
+        plugin = WhiteNoisePlugin(sample_manifest)
+        errors = plugin.validate_config({"max_drops": 2881})
         assert len(errors) == 1
         assert "max_drops" in errors[0].lower()
 
@@ -308,6 +333,69 @@ class TestWhiteNoisePlugin:
         assert len(plugin._drops) > 0
         plugin.cleanup()
         assert plugin._drops == []
+
+    # ------------------------------------------------------------------ #
+    # Multi-geometry state isolation (regression: F6)
+    # ------------------------------------------------------------------ #
+
+    def test_drop_state_is_isolated_per_geometry(self, sample_manifest):
+        """Two board geometries must not share rain state.
+
+        Regression test: rain state used to be one shared list for the
+        whole plugin, so a drop spawned at a column that only exists on a
+        wide board got silently deleted the next time ANY board rendered,
+        because a narrower board's out-of-bounds clamp ran against the same
+        list. Rendering must keep one drop list per (rows, cols).
+        """
+        from src.devices import BoardContext
+
+        plugin = WhiteNoisePlugin({**sample_manifest, "live_data": True})
+        plugin.config = {"intensity": "heavy", "drop_color": "white", "max_drops": 200}
+
+        wide = BoardContext(device_type="note_array", rows=3, cols=30)
+        narrow = BoardContext(device_type="note", rows=3, cols=15)
+
+        plugin.get_data(wide)
+        wide_key = (wide.rows, wide.cols)
+        narrow_key = (narrow.rows, narrow.cols)
+
+        # Plant a drop at a column that only exists on the wide board.
+        plugin._drops_by_geometry[wide_key].append([0, 25])
+        assert [0, 25] in plugin._drops_by_geometry[wide_key]
+
+        # Rendering the narrower board repeatedly must not touch it.
+        for _ in range(5):
+            plugin.get_data(narrow)
+
+        assert [0, 25] in plugin._drops_by_geometry[wide_key], (
+            "a drop beyond the narrow board's width was discarded by "
+            "rendering the narrow board -- rain state is not isolated per geometry"
+        )
+        assert wide_key in plugin._drops_by_geometry
+        assert narrow_key in plugin._drops_by_geometry
+        assert plugin._drops_by_geometry[wide_key] is not plugin._drops_by_geometry[narrow_key]
+
+        for c in (c for _, c in plugin._drops_by_geometry[narrow_key]):
+            assert 0 <= c < narrow.cols
+
+    def test_board_dimensions_follow_bound_board(self, sample_manifest):
+        """fetch_data must size its output to whichever board is bound."""
+        from src.devices import BoardContext
+
+        plugin = WhiteNoisePlugin({**sample_manifest, "live_data": True})
+        plugin.config = {"intensity": "light", "drop_color": "white"}
+
+        panel = BoardContext(device_type="note_array", rows=12, cols=30)
+        result = plugin.get_data(panel)
+
+        board = result.data["white_noise_array"]
+        assert len(board) == panel.rows
+        for row in board:
+            assert len(row) == panel.cols
+
+        lines = result.data["white_noise"].split("\n")
+        assert len(lines) == panel.rows
+        assert result.formatted_lines == lines
 
     # ------------------------------------------------------------------ #
     # Manifest consistency

@@ -44,14 +44,14 @@ gentle "light rain" sound instead of an overwhelming clatter.
 | ----------------- | -------- | -------------------------------------------------------------- |
 | `intensity`       | `light`  | `light` (3 drops), `medium` (6), `heavy` (10), or `custom`     |
 | `drop_color`      | `white`  | Tile colour for drops: `white`, `blue`, `violet`               |
-| `drops_per_frame` | `3`      | New drops per frame (1-22, only used with `custom` intensity)  |
-| `max_drops`       | `30`     | Max simultaneous drops on board (1-132)                        |
+| `drops_per_frame` | `3`      | New drops per frame (1-120, only used with `custom` intensity, bounded by the widest board FiestaBoard supports) |
+| `max_drops`       | `30`     | Max simultaneous drops on board (1-2880, bounded by the largest board FiestaBoard supports) |
 
 ## Variables
 
 | Variable          | Description                                    |
 | ----------------- | ---------------------------------------------- |
-| `white_noise`     | The full 6×22 board string with colour markers |
+| `white_noise`     | The full board string with colour markers, sized to the board it's rendered on (6×22 on a Flagship, 3×15 on a Note, up to 24×120 on a note-array panel) |
 | `intensity`       | Current intensity setting                      |
 | `drop_color`      | Current drop colour setting                    |
 | `active_drops`    | Number of raindrops currently on the board     |
