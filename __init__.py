@@ -1,24 +1,45 @@
 """White Noise plugin for FiestaBoard.
 
-Generates a gentle rain / white noise visual effect on the 6x22 board.
-Only a few white tiles appear at a time, drifting slowly downward like
-light rain, so the physical board produces a soft, soothing pitter-patter
-rather than an overwhelming clatter.
+Generates a gentle rain / white noise visual effect, sized to whatever board
+it renders on -- a Flagship, a Note, or any note-array panel. Falling-rain
+noise is naturally rectangle-agnostic: however many rows and columns the
+board has, that is how many rows a drop can fall through and how many
+columns it can spawn in. Only a few white tiles appear at a time, drifting
+slowly downward like light rain, so the physical board produces a soft,
+soothing pitter-patter rather than an overwhelming clatter.
 """
 
 import random
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import logging
 
 from src.plugins.base import PluginBase, PluginResult
 from src.board_chars import BoardChars
+from src.devices import NOTE_COLS, NOTE_ROWS, MAX_NOTES_PER_AXIS
 
 logger = logging.getLogger(__name__)
 
-# Board dimensions
-ROWS = 6
-COLS = 22
+# Dimensions used only when no board is bound (self.board is None) -- unit
+# tests and legacy callers hit this path. The documented contract is to
+# treat that as a Flagship. Everything on the actual render path derives
+# rows/cols from self.board via _dimensions(); nothing here is a layout
+# constant.
+DEFAULT_ROWS = 6
+DEFAULT_COLS = 22
+# Backwards-compatible aliases for the names this module used to export.
+ROWS = DEFAULT_ROWS
+COLS = DEFAULT_COLS
+
+# Largest board a user can own: an 8x8 note array. validate_config has no
+# board bound to it -- one config applies to every board the user owns --
+# so it bounds inputs against the biggest possible board. The render path
+# (_step) independently clamps to whichever board is actually being drawn,
+# so a value that's valid here but too big for a smaller board simply gets
+# clamped there rather than rejected here.
+MAX_COLS = NOTE_COLS * MAX_NOTES_PER_AXIS  # 120
+MAX_ROWS = NOTE_ROWS * MAX_NOTES_PER_AXIS  # 24
+MAX_TILES = MAX_ROWS * MAX_COLS  # 2880
 
 # Intensity presets: how many drops appear per frame
 INTENSITY_PRESETS = {
@@ -55,12 +76,44 @@ class WhiteNoisePlugin(PluginBase):
     def __init__(self, manifest: Dict[str, Any]):
         """Initialize the white noise plugin."""
         super().__init__(manifest)
-        # Persistent rain state: list of (row, col) for active drops
-        self._drops: List[List[int]] = []
+        # Rain state, simulated independently per board geometry. A single
+        # shared list would let one board's frame leak into another's: a
+        # drop spawned at column 20 for a wide array is a valid position
+        # there but out of bounds for a 15-wide Note, so if both geometries
+        # advanced the same list, whichever rendered next would silently
+        # discard it. Keyed by (rows, cols) -- see self._drops below.
+        self._drops_by_geometry: Dict[Tuple[int, int], List[List[int]]] = {}
 
     @property
     def plugin_id(self) -> str:
         return "white_noise"
+
+    @property
+    def _drops(self) -> List[List[int]]:
+        """Rain state for whichever board is currently bound (or the default).
+
+        A property rather than a plain attribute so the simulation always
+        reads/writes the entry for ``self._dimensions()`` in
+        ``self._drops_by_geometry``, without every call site having to
+        thread the geometry key through by hand.
+        """
+        return self._drops_by_geometry.setdefault(self._dimensions(), [])
+
+    @_drops.setter
+    def _drops(self, value: List[List[int]]) -> None:
+        self._drops_by_geometry[self._dimensions()] = value
+
+    def _dimensions(self) -> Tuple[int, int]:
+        """Return ``(rows, cols)`` for the board currently being rendered.
+
+        ``self.board`` is ``None`` outside a board-scoped render (unit
+        tests, legacy callers) -- default to a Flagship's 6x22 in that
+        case, per the documented contract.
+        """
+        board = self.board
+        if board is None:
+            return DEFAULT_ROWS, DEFAULT_COLS
+        return board.rows, board.cols
 
     def validate_config(self, config: Dict[str, Any]) -> List[str]:
         """Validate white noise configuration."""
@@ -80,20 +133,23 @@ class WhiteNoisePlugin(PluginBase):
                 f"Must be one of: {', '.join(RAINDROP_COLORS.keys())}"
             )
 
-        # Validate custom drop count
+        # Validate custom drop count. Bounded against the widest board that
+        # exists (an 8-wide note array), not any one board's width -- this
+        # config is shared across every board the user owns.
         if intensity == "custom":
             drops_per_frame = config.get("drops_per_frame", DEFAULT_DROPS_PER_FRAME)
             if not isinstance(drops_per_frame, int) or drops_per_frame < 1:
                 errors.append("drops_per_frame must be a positive integer")
-            elif drops_per_frame > 22:
-                errors.append("drops_per_frame cannot exceed 22 (board width)")
+            elif drops_per_frame > MAX_COLS:
+                errors.append(f"drops_per_frame cannot exceed {MAX_COLS} (widest supported board)")
 
-        # Validate max drops
+        # Validate max drops against the largest board that exists (an 8x8
+        # note array), not any one board's tile count.
         max_drops = config.get("max_drops", DEFAULT_MAX_DROPS)
         if not isinstance(max_drops, int) or max_drops < 1:
             errors.append("max_drops must be a positive integer")
-        elif max_drops > ROWS * COLS:
-            errors.append(f"max_drops cannot exceed {ROWS * COLS} (total board tiles)")
+        elif max_drops > MAX_TILES:
+            errors.append(f"max_drops cannot exceed {MAX_TILES} (largest supported board's tiles)")
 
         return errors
 
@@ -102,12 +158,12 @@ class WhiteNoisePlugin(PluginBase):
     # --------------------------------------------------------------------- #
 
     def fetch_data(self) -> PluginResult:
-        """Generate the next rain frame."""
+        """Generate the next rain frame, sized to the board being rendered."""
         try:
             intensity = self.config.get("intensity", DEFAULT_INTENSITY)
             drop_color_name = self.config.get("drop_color", DEFAULT_DROP_COLOR)
             drop_color = RAINDROP_COLORS.get(drop_color_name, BoardChars.WHITE)
-            
+
             # Determine number of drops to spawn
             if intensity == "custom":
                 num_drops = self.config.get("drops_per_frame", DEFAULT_DROPS_PER_FRAME)
@@ -115,7 +171,7 @@ class WhiteNoisePlugin(PluginBase):
                 num_drops = INTENSITY_PRESETS.get(
                     intensity, INTENSITY_PRESETS[DEFAULT_INTENSITY]
                 )["drops"]
-            
+
             # Get max drops limit
             max_drops = self.config.get("max_drops", DEFAULT_MAX_DROPS)
 
@@ -135,7 +191,11 @@ class WhiteNoisePlugin(PluginBase):
                 "max_drops": max_drops,
             }
 
-            return PluginResult(available=True, data=data)
+            return PluginResult(
+                available=True,
+                data=data,
+                formatted_lines=board_string.split("\n"),
+            )
 
         except Exception as e:
             logger.exception("Error generating white noise frame")
@@ -146,7 +206,7 @@ class WhiteNoisePlugin(PluginBase):
     # --------------------------------------------------------------------- #
 
     def _step(self, num_new_drops: int, color: int, max_drops: int) -> List[List[int]]:
-        """Advance the rain simulation by one tick.
+        """Advance the rain simulation by one tick, for the bound board.
 
         1. Move every existing drop down by one row.
         2. Remove drops that have fallen off the bottom.
@@ -159,18 +219,21 @@ class WhiteNoisePlugin(PluginBase):
             max_drops: Maximum number of drops allowed on board simultaneously.
 
         Returns:
-            6×22 board array of character codes.
+            board.rows x board.cols array of character codes (6x22 if no
+            board is bound).
         """
+        rows, cols = self._dimensions()
+
         # 1. Advance existing drops downward
-        self._drops = [[r + 1, c] for r, c in self._drops if r + 1 < ROWS]
+        self._drops = [[r + 1, c] for r, c in self._drops if r + 1 < rows]
 
         # 2. Enforce max drops limit
         if len(self._drops) > max_drops:
             self._drops = self._drops[:max_drops]
 
         # 3. Spawn new drops along the top row at random columns
-        occupied_cols = {c for _, c in self._drops if _ == 0}
-        available_cols = [c for c in range(COLS) if c not in occupied_cols]
+        occupied_cols = {c for r, c in self._drops if r == 0}
+        available_cols = [c for c in range(cols) if c not in occupied_cols]
         if available_cols and len(self._drops) < max_drops:
             # Don't spawn more than would exceed max_drops
             spawn_count = min(num_new_drops, len(available_cols), max_drops - len(self._drops))
@@ -189,11 +252,13 @@ class WhiteNoisePlugin(PluginBase):
             color: Board character code for the raindrop tile.
 
         Returns:
-            6×22 board array of character codes.
+            board.rows x board.cols array of character codes (6x22 if no
+            board is bound).
         """
-        board = [[BoardChars.BLACK] * COLS for _ in range(ROWS)]
+        rows, cols = self._dimensions()
+        board = [[BoardChars.BLACK] * cols for _ in range(rows)]
         for r, c in self._drops:
-            if 0 <= r < ROWS and 0 <= c < COLS:
+            if 0 <= r < rows and 0 <= c < cols:
                 board[r][c] = color
         return board
 
@@ -201,7 +266,7 @@ class WhiteNoisePlugin(PluginBase):
         """Convert board array to the color-marker string format.
 
         Args:
-            board: 6×22 array of character codes.
+            board: rows x cols array of character codes.
 
         Returns:
             Newline-separated string using ``{color}`` markers.
@@ -229,8 +294,8 @@ class WhiteNoisePlugin(PluginBase):
         return "\n".join(lines)
 
     def cleanup(self) -> None:
-        """Reset rain state when the plugin is disabled."""
-        self._drops = []
+        """Reset rain state (for every board geometry) when disabled."""
+        self._drops_by_geometry = {}
 
 
 # Export the plugin class

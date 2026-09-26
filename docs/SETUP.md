@@ -26,13 +26,15 @@ The White Noise plugin comes bundled with FiestaBoard and requires no additional
 
 ### Advanced Settings (for fine-tuning)
 
-- **Drops Per Frame** (1-22, default: 3)
+- **Drops Per Frame** (1-120, default: 3)
   - Only used when intensity is set to `custom`
   - Controls exactly how many new drops spawn each frame
   - Lower values (1-2) = very sparse, higher values (10-15) = dense rain
+  - Bounded by the widest board FiestaBoard supports (an 8-wide note array);
+    on any one board only as many drops as fit its actual width will spawn
   - Useful for finding the perfect sound level for your environment
 
-- **Max Simultaneous Drops** (1-132, default: 30)
+- **Max Simultaneous Drops** (1-2880, default: 30)
   - Caps the total number of raindrops on the board at once
   - Lower values (10-20) keep the board mostly empty with scattered drops
   - Higher values (50-80) create a denser, more active rain effect
@@ -60,7 +62,9 @@ To display the white noise effect on a board, use the `{white_noise}` variable i
 {white_noise}
 ```
 
-This will render the full 6-row × 22-column rain animation.
+This will render the rain animation at the full size of whatever board the
+template is on -- 6 rows × 22 columns on a Flagship, 3 × 15 on a Note, or up
+to 24 × 120 on a note-array panel.
 
 ### Recommended Settings
 
